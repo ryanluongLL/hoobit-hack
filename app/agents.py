@@ -10,16 +10,16 @@ DRY_RUN = os.getenv("DRY_RUN", "false").lower() == "true"
 ADVOCATE_PROMPT = """You are a rigorous debate agent assigned to build the strongest possible case IN FAVOR of the following claim.
 
 Your response must be a JSON object with this exact shape:
-{
+{{
   "claims": [
-    {
+    {{
       "id": "a1",
       "text": "A single, specific, falsifiable claim.",
       "claim_type": "empirical" | "causal" | "value" | "definitional",
       "depends_on": "a2" or ""
-    }
+    }}
   ]
-}
+}}
 
 Rules:
 - Write exactly 4 claims
@@ -33,16 +33,16 @@ Claim to argue for: {topic}"""
 SKEPTIC_PROMPT = """You are a rigorous debate agent assigned to build the strongest possible case AGAINST the following claim.
 
 Your response must be a JSON object with this exact shape:
-{
+{{
   "claims": [
-    {
+    {{
       "id": "s1",
       "text": "A single, specific, falsifiable claim.",
       "claim_type": "empirical" | "causal" | "value" | "definitional",
       "depends_on": "s2" or ""
-    }
+    }}
   ]
-}
+}}
 
 Rules:
 - Write exactly 4 claims
@@ -54,15 +54,22 @@ Rules:
 Claim to argue against: {topic}"""
 
 def _parse_claims(raw: str, agent: str) -> list[Claim]:
-    data = json.loads(raw)
-    return[
+    # Strip markdown code fences if Claude wrapped the response
+    cleaned = raw.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.split("```")[1]
+        if cleaned.startswith("json"):
+            cleaned = cleaned[4:]
+    cleaned = cleaned.strip()
+
+    data = json.loads(cleaned)
+    return [
         Claim(
             id=c["id"],
             text=c["text"],
             agent=agent,
             claim_type=c["claim_type"],
             depends_on=c.get("depends_on", ""),
-
         )
         for c in data["claims"]
     ]
