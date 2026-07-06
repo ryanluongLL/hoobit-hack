@@ -1,5 +1,4 @@
-import os
-os.environ["DRY_RUN"] = "true"
+
 
 from dotenv import load_dotenv
 load_dotenv()
