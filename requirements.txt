@@ -7,3 +7,4 @@ transformers==4.46.3
 torch==2.6.0
 networkx==3.4.2
 python-dotenv==1.0.1
+slowapi==0.1.9
